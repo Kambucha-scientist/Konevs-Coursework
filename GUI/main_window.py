@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QGroupBox, QFormLayout, QCheckBox, QSpinBox, QDoubleSpinBox
 )
 from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt
 from db import Database
 
 
@@ -281,27 +282,14 @@ class MainWindow(QMainWindow):
 
         layout = QFormLayout()
 
-        model_name, year, price, mileage, engine_capacity, fuel_type, transmission, ownership, spare_key, imperfections, repainted_parts = car_info
+        model_name, year, price, km_driven, engine_capacity, fuel_type, transmission, ownership, spare_key, imperfections, repainted_parts = car_info
 
-        model_edit = QLineEdit(model_name)
-        year_edit = QSpinBox()
-        year_edit.setRange(1900, 2025)
-        year_edit.setValue(year)
         price_edit = QDoubleSpinBox()
         price_edit.setRange(0, 1000000)
         price_edit.setValue(price)
-        mileage_edit = QSpinBox()
-        mileage_edit.setRange(0, 1000000)
-        mileage_edit.setValue(mileage)
-        engine_edit = QDoubleSpinBox()
-        engine_edit.setRange(0, 10)
-        engine_edit.setValue(engine_capacity)
-        fuel_combo = QComboBox()
-        fuel_combo.addItems([f[0] for f in self.db.get_filter_data()[1]])
-        fuel_combo.setCurrentText(fuel_type)
-        transmission_combo = QComboBox()
-        transmission_combo.addItems([t[0] for t in self.db.get_filter_data()[2]])
-        transmission_combo.setCurrentText(transmission)
+        km_driven_edit = QSpinBox()
+        km_driven_edit.setRange(0, 1000000)
+        km_driven_edit.setValue(km_driven)
         ownership_edit = QSpinBox()
         ownership_edit.setRange(1, 10)
         ownership_edit.setValue(ownership)
@@ -314,13 +302,8 @@ class MainWindow(QMainWindow):
         repainted_edit.setRange(0, 10)
         repainted_edit.setValue(repainted_parts)
 
-        layout.addRow("Модель:", model_edit)
-        layout.addRow("Год:", year_edit)
         layout.addRow("Цена:", price_edit)
-        layout.addRow("Пробег:", mileage_edit)
-        layout.addRow("Объем двигателя:", engine_edit)
-        layout.addRow("Топливо:", fuel_combo)
-        layout.addRow("КПП:", transmission_combo)
+        layout.addRow("Пробег:", km_driven_edit)
         layout.addRow("Кол-во владельцев:", ownership_edit)
         layout.addRow("Запасной ключ:", spare_key_check)
         layout.addRow("Кол-во дефектов:", imperfections_edit)
@@ -332,13 +315,8 @@ class MainWindow(QMainWindow):
 
         save_button.clicked.connect(lambda: self.save_car_changes(
             dialog, car_id,
-            model_edit.text(),
-            year_edit.value(),
             price_edit.value(),
-            mileage_edit.value(),
-            engine_edit.value(),
-            fuel_combo.currentText(),
-            transmission_combo.currentText(),
+            km_driven_edit.value(),
             ownership_edit.value(),
             spare_key_check.isChecked(),
             imperfections_edit.value(),
@@ -353,17 +331,12 @@ class MainWindow(QMainWindow):
         dialog.setLayout(layout)
         dialog.exec()
 
-    def save_car_changes(self, dialog, car_id, model_name, year, price, mileage,
-                         engine_capacity, fuel_type, transmission, ownership,
+    def save_car_changes(self, dialog, car_id, price, km_driven, ownership,
                          spare_key, imperfections, repainted_parts):
-        if not model_name:
-            QMessageBox.warning(self, "Ошибка", "Название модели не может быть пустым!")
-            return
 
         try:
             self.db.update_car(
-                car_id, model_name, year, price, mileage, engine_capacity,
-                fuel_type, transmission, ownership, spare_key,
+                car_id, price, km_driven, ownership, spare_key,
                 imperfections, repainted_parts
             )
             QMessageBox.information(self, "Успех", "Изменения сохранены!")
@@ -418,7 +391,7 @@ class MainWindow(QMainWindow):
                 fuel_type, transmission, ownership, spare_key,
                 imperfections, repainted_parts
             )
-            QMessageBox.information(self, "Успех", f"Автомобиль добавлен с ID: {car_id}")
+            QMessageBox.information(self, "Успех", f"Автомобиль добавлен под номером: {car_id}")
 
             self.model_input.clear()
             self.year_input.setValue(2020)
